@@ -45,8 +45,9 @@
     --sidebar-border: 210 20% 90%;
     --sidebar-ring: 201 79% 46%;
 
-    --notepad-line: 210 30% 88%;
-    --notepad-bg: 45 30% 97%;
+    --notepad-line: 210 40% 85%;
+    --notepad-margin: 0 70% 70%;
+    --notepad-bg: 48 50% 96%;
   }
 
   .dark {
@@ -78,7 +79,8 @@
     --input: 210 20% 75%;
     --ring: 201 79% 50%;
 
-    --notepad-line: 210 20% 25%;
+    --notepad-line: 210 20% 30%;
+    --notepad-margin: 0 50% 40%;
     --notepad-bg: 210 25% 14%;
   }
 }
@@ -96,14 +98,20 @@
 
 @layer components {
   .notepad-lines {
-    background-image: repeating-linear-gradient(
-      transparent,
-      transparent 31px,
-      hsl(var(--notepad-line)) 31px,
-      hsl(var(--notepad-line)) 32px
-    );
-    background-position: 0 12px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.35rem;
+    background-image: 
+      linear-gradient(to right, hsl(var(--notepad-margin)) 1px, transparent 1px),
+      repeating-linear-gradient(
+        transparent,
+        transparent 31px,
+        hsl(var(--notepad-line)) 31px,
+        hsl(var(--notepad-line)) 32px
+      );
+    background-size: 100% 100%, 100% 100%;
+    background-position: 40px 0, 0 12px;
     line-height: 32px;
+    padding-left: 50px;
   }
 
   .card-dashed {

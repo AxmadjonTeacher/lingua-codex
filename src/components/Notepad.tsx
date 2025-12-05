@@ -11,12 +11,12 @@ export function Notepad({ value, onChange }: NotepadProps) {
           Notes autosave
         </span>
       </div>
-      <div className="flex-1 overflow-y-auto p-6 pt-4">
+      <div className="flex-1 overflow-y-auto pt-4">
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Start taking notes here..."
-          className="notepad-lines h-full min-h-[500px] w-full resize-none bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
+          className="notepad-lines h-full min-h-[500px] w-full resize-none bg-transparent text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
         />
       </div>
     </div>
