@@ -4,13 +4,14 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getSessions } from "@/lib/storage";
+import { getSessions, saveSession } from "@/lib/storage";
 import { playPCM } from "@/lib/audioService";
 import { Phrase, Session } from "@/types";
-import { RotateCcw, BookCheck, GraduationCap, ArrowLeft, Volume2, FolderOpen, FolderClosed, ChevronDown, ChevronRight } from "lucide-react";
+import { RotateCcw, BookCheck, GraduationCap, ArrowLeft, Volume2, FolderOpen, FolderClosed, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FlashcardModal } from "@/components/FlashcardModal";
 import { QuizModal } from "@/components/QuizModal";
+import { toast } from "@/hooks/use-toast";
 
 interface PhraseWithSource extends Phrase {
   sourceTitle: string;
@@ -87,6 +88,27 @@ export default function MyPhrases() {
     if (!timestamp) return "";
     const date = new Date(timestamp);
     return `${date.getDate()} ${date.toLocaleString("en-US", { month: "long" })}/${date.getFullYear()}`;
+  };
+
+  const handleDeletePhrase = async (sessionId: string, phraseId: string) => {
+    const session = sessions.find((s) => s.id === sessionId);
+    if (!session) return;
+    
+    const updatedPhrases = session.phrases.filter((p) => p.id !== phraseId);
+    const updatedSession = { ...session, phrases: updatedPhrases };
+    
+    await saveSession(updatedSession);
+    setSessions((prev) => prev.map((s) => (s.id === sessionId ? updatedSession : s)));
+    setStudyIds((prev) => {
+      const next = new Set(prev);
+      next.delete(phraseId);
+      return next;
+    });
+    
+    toast({
+      title: "Phrase deleted",
+      description: "The phrase has been removed from your collection",
+    });
   };
 
   if (loading) {
@@ -247,6 +269,17 @@ export default function MyPhrases() {
                                   </ul>
                                 </div>
                               )}
+                              <div className="mt-3 flex justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeletePhrase(sessionId, phrase.id)}
+                                  className="text-muted-foreground hover:text-destructive"
+                                >
+                                  <Trash2 className="mr-1 h-3 w-3" />
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
