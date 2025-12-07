@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSessions, saveSession } from "@/lib/storage";
-import { playPCM } from "@/lib/audioService";
+import { playPCM, playBrowserTTS } from "@/lib/audioService";
 import { Phrase, Session } from "@/types";
 import { RotateCcw, BookCheck, GraduationCap, ArrowLeft, Volume2, FolderOpen, FolderClosed, ChevronDown, ChevronRight, Trash2, Loader2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -117,10 +117,15 @@ export default function MyPhrases() {
           setPlayingId(phrase.id);
           await playPCM(audioData);
           setPlayingId(null);
+        } else {
+          // Fallback to browser TTS
+          playBrowserTTS(phrase.text);
         }
       }
     } catch (error) {
       console.error("Error playing/generating audio:", error);
+      // Fallback on error
+      playBrowserTTS(phrase.text);
     } finally {
       setLoadingAudioId(null);
       setPlayingId(null);

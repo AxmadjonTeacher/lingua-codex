@@ -3,7 +3,7 @@ import { Phrase } from "@/types";
 import { Plus, X, Volume2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { playPCM } from "@/lib/audioService";
+import { playPCM, playBrowserTTS } from "@/lib/audioService";
 import { generateAudioPronunciation } from "@/lib/gemini";
 
 interface PhraseBoxProps {
@@ -35,16 +35,22 @@ export function PhraseBox({ phrases, onAddPhrase, onRemovePhrase, onUpdatePhrase
       } else {
         setLoadingId(phrase.id);
         const { audioData } = await generateAudioPronunciation(phrase.text);
+
         if (audioData) {
           const updatedPhrase = { ...phrase, audioData };
           onUpdatePhrase(updatedPhrase);
           setPlayingId(phrase.id);
           await playPCM(audioData);
           setPlayingId(null);
+        } else {
+          // Fallback to browser TTS
+          playBrowserTTS(phrase.text);
         }
       }
     } catch (error) {
       console.error("Error playing/generating audio:", error);
+      // Fallback on error
+      playBrowserTTS(phrase.text);
     } finally {
       setLoadingId(null);
       setPlayingId(null);
