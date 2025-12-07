@@ -7,11 +7,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { getSessions, saveSession } from "@/lib/storage";
 import { playPCM } from "@/lib/audioService";
 import { Phrase, Session } from "@/types";
-import { RotateCcw, BookCheck, GraduationCap, ArrowLeft, Volume2, FolderOpen, FolderClosed, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { RotateCcw, BookCheck, GraduationCap, ArrowLeft, Volume2, FolderOpen, FolderClosed, ChevronDown, ChevronRight, Trash2, Loader2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FlashcardModal } from "@/components/FlashcardModal";
 import { QuizModal } from "@/components/QuizModal";
 import { toast } from "@/hooks/use-toast";
+import { generateAudioPronunciation } from "@/lib/gemini";
 
 interface PhraseWithSource extends Phrase {
   sourceTitle: string;
@@ -24,6 +25,8 @@ export default function MyPhrases() {
   const [showFlashcards, setShowFlashcards] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -89,9 +92,38 @@ export default function MyPhrases() {
     setSessions(updatedSessions);
   };
 
-  const handlePlayAudio = async (audioData?: string) => {
-    if (audioData) {
-      await playPCM(audioData);
+  const handlePlayAudio = async (phrase: Phrase, sessionId: string) => {
+    try {
+      if (phrase.audioData) {
+        setPlayingId(phrase.id);
+        await playPCM(phrase.audioData);
+        setPlayingId(null);
+      } else {
+        setLoadingAudioId(phrase.id);
+        const { audioData } = await generateAudioPronunciation(phrase.text);
+
+        if (audioData) {
+          // Update phrase in session
+          const session = sessions.find(s => s.id === sessionId);
+          if (session) {
+            const updatedPhrases = session.phrases.map(p =>
+              p.id === phrase.id ? { ...p, audioData } : p
+            );
+            const updatedSession = { ...session, phrases: updatedPhrases };
+            await saveSession(updatedSession);
+            setSessions(prev => prev.map(s => s.id === sessionId ? updatedSession : s));
+          }
+
+          setPlayingId(phrase.id);
+          await playPCM(audioData);
+          setPlayingId(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error playing/generating audio:", error);
+    } finally {
+      setLoadingAudioId(null);
+      setPlayingId(null);
     }
   };
 
@@ -227,8 +259,8 @@ export default function MyPhrases() {
                         <div
                           key={phrase.id}
                           className={`rounded-xl border bg-card p-5 transition-all ${phrase.isStudy
-                              ? "border-primary shadow-md"
-                              : "border-border"
+                            ? "border-primary shadow-md"
+                            : "border-border"
                             }`}
                         >
                           <div className="flex items-start gap-4">
@@ -241,17 +273,20 @@ export default function MyPhrases() {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                   <h3 className="text-lg font-bold text-foreground">{phrase.text}</h3>
-                                  {phrase.audioData && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"
-                                      onClick={() => handlePlayAudio(phrase.audioData)}
-                                    >
-                                      <Volume2 className="mr-1 h-4 w-4" />
-                                      Play
-                                    </Button>
-                                  )}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"
+                                    disabled={loadingAudioId === phrase.id || playingId === phrase.id}
+                                    onClick={() => handlePlayAudio(phrase, sessionId)}
+                                  >
+                                    {loadingAudioId === phrase.id ? (
+                                      <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Volume2 className={`mr-1 h-4 w-4 ${playingId === phrase.id ? "animate-pulse" : ""}`} />
+                                    )}
+                                    {phrase.audioData ? "Play" : "Generate Audio"}
+                                  </Button>
                                 </div>
                                 <div className="text-sm text-muted-foreground">
                                   {formatDate(phrase.createdAt)}

@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { Phrase } from "@/types";
-import { Plus, X, Volume2 } from "lucide-react";
+import { Plus, X, Volume2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { playPCM } from "@/lib/audioService";
+import { generateAudioPronunciation } from "@/lib/gemini";
 
 interface PhraseBoxProps {
   phrases: Phrase[];
   onAddPhrase: (text: string) => void;
   onRemovePhrase: (id: string) => void;
+  onUpdatePhrase: (phrase: Phrase) => void;
   maxPhrases: number;
 }
 
-export function PhraseBox({ phrases, onAddPhrase, onRemovePhrase, maxPhrases }: PhraseBoxProps) {
+export function PhraseBox({ phrases, onAddPhrase, onRemovePhrase, onUpdatePhrase, maxPhrases }: PhraseBoxProps) {
   const [input, setInput] = useState("");
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleAdd = () => {
     if (input.trim() && phrases.length < maxPhrases) {
@@ -22,9 +26,28 @@ export function PhraseBox({ phrases, onAddPhrase, onRemovePhrase, maxPhrases }: 
     }
   };
 
-  const handlePlayAudio = async (audioData?: string) => {
-    if (audioData) {
-      await playPCM(audioData);
+  const handlePlayAudio = async (phrase: Phrase) => {
+    try {
+      if (phrase.audioData) {
+        setPlayingId(phrase.id);
+        await playPCM(phrase.audioData);
+        setPlayingId(null);
+      } else {
+        setLoadingId(phrase.id);
+        const { audioData } = await generateAudioPronunciation(phrase.text);
+        if (audioData) {
+          const updatedPhrase = { ...phrase, audioData };
+          onUpdatePhrase(updatedPhrase);
+          setPlayingId(phrase.id);
+          await playPCM(audioData);
+          setPlayingId(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error playing/generating audio:", error);
+    } finally {
+      setLoadingId(null);
+      setPlayingId(null);
     }
   };
 
@@ -71,17 +94,20 @@ export function PhraseBox({ phrases, onAddPhrase, onRemovePhrase, maxPhrases }: 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-foreground">"{phrase.text}"</p>
-                  {phrase.audioData && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePlayAudio(phrase.audioData)}
-                      className="h-6 px-2 text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"
-                    >
-                      <Volume2 className="h-3 w-3 mr-1" />
-                      Play
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handlePlayAudio(phrase)}
+                    disabled={loadingId === phrase.id || playingId === phrase.id}
+                    className="h-6 px-2 text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"
+                  >
+                    {loadingId === phrase.id ? (
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    ) : (
+                      <Volume2 className={`h-3 w-3 mr-1 ${playingId === phrase.id ? "animate-pulse" : ""}`} />
+                    )}
+                    {phrase.audioData ? "Play" : "Generate Audio"}
+                  </Button>
                 </div>
                 {phrase.definition && (
                   <p className="mt-1 text-sm italic text-muted-foreground">{phrase.definition}</p>

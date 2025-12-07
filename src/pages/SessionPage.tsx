@@ -8,7 +8,7 @@ import { FlashcardModal } from "@/components/FlashcardModal";
 import { Button } from "@/components/ui/button";
 import { getSession, saveSession } from "@/lib/storage";
 import { createPhrase, enrichPhraseWithAI } from "@/lib/phrases";
-import { Session } from "@/types";
+import { Session, Phrase } from "@/types";
 import { GraduationCap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -47,25 +47,25 @@ export default function SessionPage() {
 
   const handleAddPhrase = useCallback(async (text: string) => {
     if (!session) return;
-    
+
     const newPhrase = createPhrase(text);
     let updatedPhrases = [...session.phrases, newPhrase];
-    
+
     // Auto-delete oldest phrase if exceeding limit
     if (updatedPhrases.length > MAX_PHRASES) {
       // Sort by createdAt to find oldest (smallest timestamp)
       const sortedByAge = [...updatedPhrases].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
       const oldestPhrase = sortedByAge[0];
       updatedPhrases = updatedPhrases.filter(p => p.id !== oldestPhrase.id);
-      
+
       toast({
         title: "Oldest phrase removed",
         description: `"${oldestPhrase.text}" was removed to make room (40 phrase limit)`,
       });
     }
-    
+
     updateSession({ phrases: updatedPhrases });
-    
+
     toast({
       title: "Phrase added",
       description: "Generating AI definition...",
@@ -73,10 +73,18 @@ export default function SessionPage() {
 
     // Enrich with AI in background
     const enrichedPhrase = await enrichPhraseWithAI(newPhrase);
-    const finalPhrases = updatedPhrases.map(p => 
+    const finalPhrases = updatedPhrases.map(p =>
       p.id === enrichedPhrase.id ? enrichedPhrase : p
     );
     updateSession({ phrases: finalPhrases });
+  }, [session, updateSession]);
+
+  const handleUpdatePhrase = useCallback((updatedPhrase: Phrase) => {
+    if (!session) return;
+    const updatedPhrases = session.phrases.map((p) =>
+      p.id === updatedPhrase.id ? updatedPhrase : p
+    );
+    updateSession({ phrases: updatedPhrases });
   }, [session, updateSession]);
 
   const handleRemovePhrase = useCallback((phraseId: string) => {
@@ -91,22 +99,23 @@ export default function SessionPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
-      
+
       <main className="flex flex-1 gap-0 overflow-hidden">
         {/* Left Panel - Video & Phrases */}
         <div className="flex w-full flex-col lg:w-1/2">
           <div className="p-4">
             <YouTubePlayer videoId={session.youtubeId} title={session.title} />
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4 pt-0">
             <PhraseBox
               phrases={session.phrases}
               onAddPhrase={handleAddPhrase}
               onRemovePhrase={handleRemovePhrase}
+              onUpdatePhrase={handleUpdatePhrase}
               maxPhrases={MAX_PHRASES}
             />
-            
+
             <Button
               variant="outline"
               onClick={() => setShowFlashcards(true)}
@@ -121,8 +130,8 @@ export default function SessionPage() {
 
         {/* Right Panel - Notes */}
         <div className="hidden h-[calc(100vh-56px)] w-1/2 border-l border-border p-4 lg:block">
-          <Notepad 
-            value={session.notes} 
+          <Notepad
+            value={session.notes}
             onChange={handleNotesChange}
             onSavePhrase={handleAddPhrase}
           />
