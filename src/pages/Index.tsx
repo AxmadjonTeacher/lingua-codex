@@ -51,6 +51,19 @@ export default function Index() {
     });
   };
 
+  const handleUpdateTitle = async (id: string, newTitle: string) => {
+    const session = sessions.find((s) => s.id === id);
+    if (session) {
+      const updated = { ...session, title: newTitle };
+      await saveSession(updated);
+      await loadSessions();
+      toast({
+        title: "Title updated",
+        description: "Session title has been changed",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
@@ -88,6 +101,7 @@ export default function Index() {
                 key={session.id}
                 session={session}
                 onDelete={handleDeleteSession}
+                onUpdateTitle={handleUpdateTitle}
               />
             ))}
           </div>
