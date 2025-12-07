@@ -15,7 +15,7 @@ export function Footer() {
         href="https://alxorazmiymaktabi.vercel.app"
         target="_blank"
         rel="noopener noreferrer"
-        className="hover:text-foreground transition-colors inline-flex items-center gap-1 align-middle"
+        className="hover:text-foreground transition-colors inline-flex items-center gap-1 align-middle underline"
       >
         Al-Xorazmiy School
         <img src="/school_logo.png" alt="Logo" className="h-4 w-auto object-contain" />
