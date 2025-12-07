@@ -106,6 +106,32 @@ export function Notepad({ value, onChange, onSavePhrase }: NotepadProps) {
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onMouseUp={() => {
+            setTimeout(() => {
+              const selection = window.getSelection();
+              if (!selection || selection.isCollapsed) {
+                return;
+              }
+
+              const text = selection.toString().trim();
+              if (!text || text.length > 100) {
+                return;
+              }
+
+              const range = selection.getRangeAt(0);
+              const rect = range.getBoundingClientRect();
+              const containerRect = containerRef.current?.getBoundingClientRect();
+              
+              if (containerRect) {
+                setPopup({
+                  visible: true,
+                  x: rect.left - containerRect.left + rect.width / 2,
+                  y: rect.top - containerRect.top - 40,
+                  text,
+                });
+              }
+            }, 10);
+          }}
           placeholder="Start taking notes here..."
           className="notepad-lines h-full min-h-[500px] w-full resize-none bg-transparent text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
         />

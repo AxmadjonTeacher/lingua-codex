@@ -74,9 +74,9 @@ export function PhraseBox({ phrases, onAddPhrase, onRemovePhrase, maxPhrases }: 
                   {phrase.audioData && (
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => handlePlayAudio(phrase.audioData)}
-                      className="h-6 px-2 text-primary hover:text-primary/80"
+                      className="h-6 px-2 text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"
                     >
                       <Volume2 className="h-3 w-3 mr-1" />
                       Play
