@@ -8,6 +8,7 @@ import SessionPage from "./pages/SessionPage";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import MyPhrases from "./pages/MyPhrases";
+import OnlineLessons from "./pages/OnlineLessons";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/my-phrases" element={<MyPhrases />} />
+          <Route path="/online-lessons" element={<OnlineLessons />} />
           <Route path="/session/:id" element={<SessionPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
