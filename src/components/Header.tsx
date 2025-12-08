@@ -47,12 +47,15 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <a href="https://aljeopardy.vercel.app" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200">
+          <div className="relative">
+            <Button variant="outline" size="sm" disabled className="gap-2 bg-purple-50 text-purple-700 border-purple-200">
               <Gamepad2 className="h-4 w-4" />
               Fun & Games
             </Button>
-          </a>
+            <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10 border border-white leading-none">
+              SOON
+            </span>
+          </div>
 
           {user ? (
             <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate("/profile")}>
