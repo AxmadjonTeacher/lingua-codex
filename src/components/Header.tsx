@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { User as UserIcon, Mail, Gamepad2, Mic } from "lucide-react";
+import { User as UserIcon, Mail, Gamepad2, Mic, Video } from "lucide-react";
 import { migrateLocalSessions } from "@/lib/storage";
 
 export function Header() {
@@ -63,6 +63,16 @@ export function Header() {
               Speaking
             </Button>
           </a>
+
+          <div className="relative">
+            <Button variant="outline" size="sm" disabled className="gap-2 bg-pink-50 text-pink-700 border-pink-200">
+              <Video className="h-4 w-4" />
+              Online Lessons
+            </Button>
+            <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10 border border-white leading-none">
+              SOON
+            </span>
+          </div>
 
           {user ? (
             <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate("/profile")}>
