@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { User as UserIcon, Mail, Gamepad2 } from "lucide-react";
+import { User as UserIcon, Mail, Gamepad2, Mic } from "lucide-react";
 import { migrateLocalSessions } from "@/lib/storage";
 
 export function Header() {
@@ -56,6 +56,13 @@ export function Header() {
               SOON
             </span>
           </div>
+
+          <a href="https://app.sesame.com/" target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="gap-2 bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200">
+              <Mic className="h-4 w-4" />
+              Speaking
+            </Button>
+          </a>
 
           {user ? (
             <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate("/profile")}>
