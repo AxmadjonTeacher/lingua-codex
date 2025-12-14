@@ -11,6 +11,7 @@ import MyPhrases from "./pages/MyPhrases";
 import OnlineLessons from "./pages/OnlineLessons";
 import LessonViewer from "./pages/LessonViewer";
 import NotFound from "./pages/NotFound";
+import ExploreView from "./pages/ExploreView";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/online-lessons" element={<OnlineLessons />} />
           <Route path="/lesson/:id" element={<LessonViewer />} />
           <Route path="/session/:id" element={<SessionPage />} />
+          <Route path="/explore" element={<ExploreView />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

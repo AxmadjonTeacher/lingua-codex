@@ -37,3 +37,17 @@ export interface Lesson {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ExplorationResult {
+  phrase: string;
+  explanation: string;
+  simpleExample: {
+    sentence: string;
+    explanation: string;
+  };
+  scenarios: {
+    context: string;
+    sentence: string;
+    explanation: string;
+  }[];
+}
