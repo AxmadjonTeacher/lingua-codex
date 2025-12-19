@@ -35,65 +35,46 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a "Cultural & Contextual Guide" for the Uzbek language. 
-Your goal is to explain how a phrase feels and functions in real-life conversations.
-Output EVERYTHING in JSON format.
-Detailed Instructions:
-1.  **Friendly & Emoji-led**: Be approachable and use emojis.
-2.  **Uzbek Meta-data**: The 'explanation' and 'scenarios[].explanation' MUST be in Uzbek.
-3.  **Target Language Content**: The 'simpleExample.sentence' and 'scenarios[].sentence' should be in the target language (usually English, based on input) or the language of the phrase being explored, but the context/explanation is ALWAYS Uzbek.
-4.  **Real-life Scenarios**: Provide 3 distinct scenarios (e.g., At Work, With Friends, Formal).`
-          },
-          {
-            role: 'user',
-            content: `Explore the phrase: "${phrase}".
-            
-Return structured JSON matching this schema:
+            content: `You are a language learning assistant for Uzbek speakers learning English.
+Your task is to explain English phrases/words with their meaning in Uzbek, provide a simple English example, and give 3 real-life situational examples.
+
+ALWAYS respond in this exact JSON format:
 {
-  "explanation": "General meaning and nuance of the phrase (in Uzbek)",
+  "explanation": "The meaning of the phrase explained in Uzbek. Start with the phrase itself, then explain what it means in Uzbek.",
   "simpleExample": {
-    "sentence": "A simple sentence using the phrase",
-    "explanation": "What this specific sentence means (in Uzbek)"
+    "sentence": "A simple English sentence using the phrase",
+    "explanation": ""
   },
   "scenarios": [
     {
-      "context": "Context title e.g. 'Ishda' (At work) (in Uzbek)",
-      "sentence": "Natural usage sentence",
-      "explanation": "Nuance explanation (in Uzbek)"
+      "context": "Work / Career",
+      "sentence": "A natural English sentence using the phrase in this context",
+      "explanation": ""
     },
-    { "context": "...", "sentence": "...", "explanation": "..." },
-    { "context": "...", "sentence": "...", "explanation": "..." }
+    {
+      "context": "Health / Lifestyle", 
+      "sentence": "A natural English sentence using the phrase in this context",
+      "explanation": ""
+    },
+    {
+      "context": "Technology / Convenience",
+      "sentence": "A natural English sentence using the phrase in this context",
+      "explanation": ""
+    }
   ]
-}`
+}
+
+Important guidelines:
+- The "explanation" field MUST be in Uzbek and should explain the meaning, nuance, and when the phrase is typically used
+- All "sentence" fields should be in English
+- The scenario contexts should be relevant to the phrase (choose appropriate contexts like Work/Career, Health/Lifestyle, Technology, Relationships, Education, Daily Life, etc.)
+- Make the examples practical and relatable`
+          },
+          {
+            role: 'user',
+            content: `Explain the English phrase or word: "${phrase}"`
           }
         ],
-        response_format: {
-            type: "json_object",
-            schema: {
-                type: "object",
-                properties: {
-                    explanation: { type: "string" },
-                    simpleExample: {
-                        type: "object",
-                        properties: {
-                            sentence: { type: "string" },
-                            explanation: { type: "string" }
-                        }
-                    },
-                    scenarios: {
-                        type: "array",
-                        items: {
-                            type: "object",
-                            properties: {
-                                context: { type: "string" },
-                                sentence: { type: "string" },
-                                explanation: { type: "string" }
-                            }
-                        }
-                    }
-                }
-            }
-        }
       }),
     });
 
@@ -112,13 +93,19 @@ Return structured JSON matching this schema:
 
     console.log("Lovable AI response:", content);
 
-    // Parse the JSON content directly as we requested structured output
+    // Parse the JSON content
     let parsedContent;
     try {
-        parsedContent = JSON.parse(content);
+        // Try to extract JSON from the response
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            parsedContent = JSON.parse(jsonMatch[0]);
+        } else {
+            parsedContent = JSON.parse(content);
+        }
     } catch (e) {
         console.error("Failed to parse JSON:", content);
-         throw new Error("Invalid JSON format from AI");
+        throw new Error("Invalid JSON format from AI");
     }
 
     return new Response(JSON.stringify(parsedContent), {

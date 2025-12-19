@@ -1,12 +1,25 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Lesson } from "@/types";
 
+// Type for the lessons table (not in auto-generated types yet)
+interface LessonRow {
+    id: string;
+    title: string;
+    description: string | null;
+    video_url: string | null;
+    embed_link: string | null;
+    pdf_urls: string[] | null;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
+}
+
 /**
  * Fetch all lessons from the database
  */
 export async function getLessons(): Promise<Lesson[]> {
     const { data, error } = await supabase
-        .from('lessons')
+        .from('lessons' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -15,7 +28,7 @@ export async function getLessons(): Promise<Lesson[]> {
         throw error;
     }
 
-    return data.map(lesson => ({
+    return (data as unknown as LessonRow[]).map(lesson => ({
         id: lesson.id,
         title: lesson.title,
         description: lesson.description,
@@ -40,7 +53,7 @@ export async function createLesson(lesson: {
     createdBy: string;
 }): Promise<Lesson> {
     const { data, error } = await supabase
-        .from('lessons')
+        .from('lessons' as any)
         .insert({
             title: lesson.title,
             description: lesson.description || null,
@@ -57,16 +70,17 @@ export async function createLesson(lesson: {
         throw error;
     }
 
+    const row = data as unknown as LessonRow;
     return {
-        id: data.id,
-        title: data.title,
-        description: data.description,
-        videoUrl: data.video_url,
-        embedLink: data.embed_link,
-        pdfUrls: data.pdf_urls,
-        createdBy: data.created_by,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        videoUrl: row.video_url,
+        embedLink: row.embed_link,
+        pdfUrls: row.pdf_urls,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
     };
 }
 
@@ -78,7 +92,7 @@ export async function updateLesson(
     updates: Partial<Omit<Lesson, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>>
 ): Promise<Lesson> {
     const { data, error } = await supabase
-        .from('lessons')
+        .from('lessons' as any)
         .update({
             title: updates.title,
             description: updates.description,
@@ -96,16 +110,17 @@ export async function updateLesson(
         throw error;
     }
 
+    const row = data as unknown as LessonRow;
     return {
-        id: data.id,
-        title: data.title,
-        description: data.description,
-        videoUrl: data.video_url,
-        embedLink: data.embed_link,
-        pdfUrls: data.pdf_urls,
-        createdBy: data.created_by,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        videoUrl: row.video_url,
+        embedLink: row.embed_link,
+        pdfUrls: row.pdf_urls,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
     };
 }
 
@@ -114,7 +129,7 @@ export async function updateLesson(
  */
 export async function deleteLesson(id: string): Promise<void> {
     const { error } = await supabase
-        .from('lessons')
+        .from('lessons' as any)
         .delete()
         .eq('id', id);
 
