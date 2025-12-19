@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { explorePhrase } from "@/lib/geminiService";
 import { ExplorationResult } from "@/types";
-import { Search, Loader2, Cloud, MessageCircle, Lightbulb } from "lucide-react";
+import { Search, Loader2, Cloud, Volume2 } from "lucide-react";
 import { toast } from "sonner";
+import { playBrowserTTS } from "@/lib/audioService";
 
 export default function ExploreView() {
     const [query, setQuery] = useState("");
@@ -32,6 +33,10 @@ export default function ExploreView() {
         if (e.key === 'Enter') {
             handleSearch();
         }
+    };
+
+    const handlePlayAudio = (text: string) => {
+        playBrowserTTS(text);
     };
 
     return (
@@ -81,9 +86,19 @@ export default function ExploreView() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-2xl font-semibold text-foreground mb-3">
-                                    {result.phrase} —
-                                </p>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <p className="text-2xl font-semibold text-foreground">
+                                        {result.phrase} —
+                                    </p>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-orange-500 hover:text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900/30"
+                                        onClick={() => handlePlayAudio(result.phrase)}
+                                    >
+                                        <Volume2 className="h-5 w-5" />
+                                    </Button>
+                                </div>
                                 <p className="text-lg text-foreground leading-relaxed flex items-start gap-2">
                                     <span className="text-orange-500 mt-1">👉</span>
                                     <span>{result.explanation}</span>
@@ -99,9 +114,19 @@ export default function ExploreView() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-xl font-medium text-foreground italic">
-                                    "{result.simpleExample.sentence}"
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-xl font-medium text-foreground italic">
+                                        "{result.simpleExample.sentence}"
+                                    </p>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                                        onClick={() => handlePlayAudio(result.simpleExample.sentence)}
+                                    >
+                                        <Volume2 className="h-5 w-5" />
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
 
@@ -118,9 +143,19 @@ export default function ExploreView() {
                                         <h4 className="font-bold text-foreground">
                                             {index + 1}. {scenario.context}
                                         </h4>
-                                        <p className="text-foreground pl-4 border-l-2 border-muted">
-                                            {scenario.sentence}
-                                        </p>
+                                        <div className="flex items-center gap-2 pl-4 border-l-2 border-muted">
+                                            <p className="text-foreground flex-1">
+                                                {scenario.sentence}
+                                            </p>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 shrink-0 text-green-500 hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                                onClick={() => handlePlayAudio(scenario.sentence)}
+                                            >
+                                                <Volume2 className="h-5 w-5" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </CardContent>
