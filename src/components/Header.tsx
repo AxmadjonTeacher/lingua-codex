@@ -121,15 +121,15 @@ export function Header() {
             </Button>
           </a>
 
-          <div className="relative">
-            <Button variant="outline" size="sm" disabled className="gap-2 bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-800">
-              <Video className="h-4 w-4" />
-              Online Lessons
-            </Button>
-            <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10 border border-white leading-none">
-              SOON
-            </span>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 bg-pink-50 hover:bg-pink-100 text-pink-700 hover:text-pink-700 border-pink-200 hover:border-pink-300 dark:bg-pink-950 dark:hover:bg-pink-900 dark:text-pink-300 dark:hover:text-pink-200 dark:border-pink-800 dark:hover:border-pink-700"
+            onClick={() => navigate("/online-lessons")}
+          >
+            <Video className="h-4 w-4" />
+            Online Lessons
+          </Button>
 
 
           {user ? (
