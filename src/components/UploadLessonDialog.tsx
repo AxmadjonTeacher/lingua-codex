@@ -13,9 +13,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Link as LinkIcon, FileText, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Upload, Link as LinkIcon, FileText, X, AlertTriangle } from "lucide-react";
 import { uploadVideo, uploadPDF, createLesson } from "@/lib/lessonsService";
 import { toast } from "@/hooks/use-toast";
+
+const FILE_SIZE_WARNING_MB = 100;
+const formatFileSize = (bytes: number) => {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+};
 
 interface UploadLessonDialogProps {
     open: boolean;
@@ -43,6 +51,14 @@ export function UploadLessonDialog({
         const file = e.target.files?.[0];
         if (file && file.type.startsWith("video/")) {
             setVideoFile(file);
+            // Warn about large files
+            if (file.size > FILE_SIZE_WARNING_MB * 1024 * 1024) {
+                toast({
+                    title: "Large file detected",
+                    description: `This file is ${formatFileSize(file.size)}. Consider using a YouTube/Vimeo embed link for better reliability.`,
+                    variant: "default",
+                });
+            }
         } else {
             toast({
                 title: "Invalid file",
@@ -241,12 +257,21 @@ export function UploadLessonDialog({
                                     onChange={handleVideoFileChange}
                                     disabled={uploading}
                                 />
-                                {videoFile && (
-                                    <span className="text-sm text-muted-foreground">
-                                        {videoFile.name}
-                                    </span>
-                                )}
                             </div>
+                            {videoFile && (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span>{videoFile.name}</span>
+                                    <span className="text-xs">({formatFileSize(videoFile.size)})</span>
+                                </div>
+                            )}
+                            {videoFile && videoFile.size > FILE_SIZE_WARNING_MB * 1024 * 1024 && (
+                                <Alert variant="default" className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+                                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                    <AlertDescription className="text-amber-700 dark:text-amber-300">
+                                        Large files may fail to upload. We recommend using a YouTube or Vimeo embed link instead for videos over 100MB.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </div>
                     ) : (
                         <div className="space-y-2">
